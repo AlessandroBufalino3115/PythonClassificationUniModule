@@ -1,14 +1,3 @@
-"""
-From scratch implementation of the famous ResNet models.
-The intuition for ResNet is simple and clear, but to code
-it didn't feel super clear at first, even when reading Pytorch own
-implementation. 
-Video explanation: 
-Got any questions leave a comment on youtube :)
-Programmed by Aladdin Persson <aladdin.persson at hotmail dot com>
-*    2020-04-12 Initial coding
-"""
-
 import torch
 import torch.nn as nn
 
@@ -127,6 +116,10 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
 
+
+
+
+
 def ResNet50(img_channel=3, num_classes=12):
     return ResNet(block, [3, 4, 6, 3], img_channel, num_classes)
 
@@ -151,20 +144,13 @@ def test():
 import torch.optim as optim
 
 
-model = ResNet50()
+model = ResNet101()
 print(model)
 
-# specify loss function (cross entropy loss)
 criterion = nn.CrossEntropyLoss()
-# specify optimizer (Adam optimiser) and learning rate = 0.003
-optimizer = optim.Adam(model.parameters(), lr=0.003)
+optimizer = optim.Adam(model.parameters(), lr=0.0005)
 
 
-
-
-
-
-# imshow function for displaying images
 def imshow(image, ax=None, title=None, normalize=True):
     """Imshow for Tensor."""
     if ax is None:
@@ -189,16 +175,14 @@ def imshow(image, ax=None, title=None, normalize=True):
     return ax
 
 
-
-
 # dataset directory
-data_dir = '/content/gdrive/MyDrive/Dataset'
+data_dir = '/content/drive/MyDrive/Dataset'
 
 # define batch size
-batch_size = 8
+batch_size = 64
 
 # define transforms (colour)
-transform = transforms.Compose([transforms.Resize(32), # resize to 32x?
+transform = transforms.Compose([transforms.Resize(64), # resize to 32x?
                                 transforms.CenterCrop(32), # take a square (32x32) crop from the centre
                                 transforms.ToTensor(), # convert data to torch.FloatTensor
                                 transforms.Normalize([0.5, 0.5, 0.5],
@@ -216,18 +200,8 @@ test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=True)
 
 
 
-
-
-
-
-
-
-
-
-
-
 # number of epochs to train the model
-n_epochs = 20
+n_epochs = 100
 
 # initialise tracker for minimum validation loss
 valid_loss_min = np.Inf # set initial "min" to infinity
@@ -290,7 +264,76 @@ for epoch in range(n_epochs):
         print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
         valid_loss_min,
         valid_loss))
-        torch.save(model.state_dict(), 'CNN_model.pt') # save in colab
-        torch.save(model.state_dict(), '/content/gdrive/MyDrive/CNN_model.pt') # save in google drive
+        torch.save(model.state_dict(), 'ResNet50.pt') # save in colab
+        torch.save(model.state_dict(), '/content/drive/MyDrive/ResNet50.pt') # save in google drive
         valid_loss_min = valid_loss
 
+plt.plot(train_losses, label='Training loss')
+plt.plot(val_losses, label='Validation loss')
+plt.legend(frameon=False)
+
+
+model.load_state_dict(torch.load('ResNet50.pt'))
+
+
+
+#initialize lists to monitor test loss and accuracy
+test_loss = 0.0
+class_correct = list(0. for i in range(12))
+class_total = list(0. for i in range(12))
+
+model.eval() # prep model for evaluation
+
+for data, target in test_loader:
+    # forward pass: compute predicted outputs by passing inputs to the model
+    output = model(data)
+    # calculate the loss
+    loss = criterion(output, target)
+    # update test loss 
+    test_loss += loss.item()*data.size(0)
+    # convert output probabilities to predicted class
+    _, pred = torch.max(output, 1)
+    # compare predictions to true label
+    correct = np.squeeze(pred.eq(target.data.view_as(pred)))
+    # calculate test accuracy for each object class
+    for i in range(len(target)):
+        label = target.data[i]
+        class_correct[label] += correct[i].item()
+        class_total[label] += 1
+
+# calculate and print avg test loss
+test_loss = test_loss/len(test_loader.sampler)
+print('Test Loss: {:.6f}\n'.format(test_loss))
+
+for i in range(12):
+    if class_total[i] > 0:
+        print('Test Accuracy of %5s: %2d%% (%2d/%2d)' % (
+            str(i), 100 * class_correct[i] / class_total[i],
+            np.sum(class_correct[i]), np.sum(class_total[i])))
+    else:
+        print('Test Accuracy of %5s: N/A (no training examples)' % (classes[i]))
+
+print('\nTest Accuracy (Overall): %2d%% (%2d/%2d)' % (
+    100. * np.sum(class_correct) / np.sum(class_total),
+    np.sum(class_correct), np.sum(class_total)))
+
+
+
+# Visualize Sample Test Results
+
+# obtain one batch of test images
+dataiter = iter(test_loader)
+images, labels = dataiter.next()
+
+# get sample outputs
+output = model(images)
+# convert output probabilities to predicted class
+_, preds = torch.max(output, 1)
+
+# plot the first 4 images in the batch, along with the corresponding labels
+fig, axes = plt.subplots(figsize=(10,4), ncols=4)
+for ii in range(4):
+    ax = axes[ii]
+    imshow(images[ii], ax=ax, normalize=True)
+    ax.set_title("{} ({})".format(str(preds[ii].item()), str(labels[ii].item())),
+                 color=("green" if preds[ii]==labels[ii] else "red")) 

@@ -26,3 +26,6 @@ proper resnet stuff
 
 
 https://drive.google.com/drive/folders/18HdUuFPQUsI1IDsePJPwK89-w_4_s64n?usp=share_link
+
+
+https://towardsdatascience.com/improving-the-performance-of-resnet50-graffiti-image-classifier-with-hyperparameter-tuning-in-keras-dbb59f43c6f7
