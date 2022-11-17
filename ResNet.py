@@ -9,6 +9,10 @@ from torchvision import datasets, transforms
 
 
 
+
+import torch.optim as optim
+
+
 class block(nn.Module):
     def __init__(self, in_channels, intermediate_channels, identity_downsample=None, stride=1):
         super(block, self).__init__()
@@ -141,16 +145,6 @@ def test():
 
 
 
-import torch.optim as optim
-
-
-model = ResNet101()
-print(model)
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.0005)
-
-
 def imshow(image, ax=None, title=None, normalize=True):
     """Imshow for Tensor."""
     if ax is None:
@@ -175,165 +169,190 @@ def imshow(image, ax=None, title=None, normalize=True):
     return ax
 
 
-# dataset directory
-data_dir = '/content/drive/MyDrive/Dataset'
+def RunAI(lr, batch_size,n_epochs, ResNetType):
 
-# define batch size
-batch_size = 64
+    model = None
 
-# define transforms (colour)
-transform = transforms.Compose([transforms.Resize(64), # resize to 32x?
-                                transforms.CenterCrop(32), # take a square (32x32) crop from the centre
-                                transforms.ToTensor(), # convert data to torch.FloatTensor
-                                transforms.Normalize([0.5, 0.5, 0.5],
-                                                     [0.5, 0.5, 0.5])]) # normalise with mean 0.5 and standard deviation 0.5 for each colour channel
-
-# choose the training, validation and test datasets
-train_data = datasets.ImageFolder(data_dir + '/Train', transform=transform)
-val_data = datasets.ImageFolder(data_dir + '/Validate', transform=transform)
-test_data = datasets.ImageFolder(data_dir + '/Test', transform=transform)
-
-# prepare the data loaders
-train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True)
-val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=True)
+    if ResNetType == 1:
+      model = ResNet101()
+    elif ResNetType == 2:
+      model = ResNet50()
+    else :
+      model = ResNet152()
 
 
 
-# number of epochs to train the model
-n_epochs = 100
 
-# initialise tracker for minimum validation loss
-valid_loss_min = np.Inf # set initial "min" to infinity
 
-# create empty lists to store the training and validation losses
-train_losses, val_losses = [], []
+    
+    savedFileName = "ResNet" + " " + str(lr) + " " + str(batch_size) + " " + str(n_epochs)  +  " "  + str(ResNetType) + ".pt"
+    #print(model)
 
-for epoch in range(n_epochs):
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr)
+
+
+    # dataset directory
+    data_dir = '/content/drive/MyDrive/Dataset'
+
+    # define batch size
+    #batch_size = 64
+
+    # define transforms (colour)
+    transform = transforms.Compose([transforms.Resize(64), # resize to 32x?
+                            transforms.CenterCrop(32), # take a square (32x32) crop from the centre
+                            transforms.ToTensor(), # convert data to torch.FloatTensor
+                            transforms.Normalize([0.5, 0.5, 0.5],
+                                                    [0.5, 0.5, 0.5])]) # normalise with mean 0.5 and standard deviation 0.5 for each colour channel
+
+    # choose the training, validation and test datasets
+    train_data = datasets.ImageFolder(data_dir + '/Train', transform=transform)
+    val_data = datasets.ImageFolder(data_dir + '/Validate', transform=transform)
+    test_data = datasets.ImageFolder(data_dir + '/Test', transform=transform)
+
+    # prepare the data loaders
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=True)
+
+
+
+    # number of epochs to train the model
+    #n_epochs = 100
+
+    # initialise tracker for minimum validation loss
+    valid_loss_min = np.Inf # set initial "min" to infinity
+
+    # create empty lists to store the training and validation losses
+    train_losses, val_losses = [], []
+
+    for epoch in range(n_epochs):
     # monitor training loss
-    train_loss = 0.0
-    valid_loss = 0.0
-    
-    ###################
-    # train the model #
-    ###################
-    model.train() # prep model for training
-    for data, target in train_loader:
-        # clear the gradients of all optimized variables
-        optimizer.zero_grad()
-        # forward pass: compute predicted outputs by passing inputs to the model
-        output = model(data)
-        # calculate the loss
-        loss = criterion(output, target)
-        # backward pass: compute gradient of the loss with respect to model parameters
-        loss.backward()
-        # perform a single optimization step (parameter update)
-        optimizer.step()
-        # update running training loss
-        train_loss += loss.item()*data.size(0)
+        train_loss = 0.0
+        valid_loss = 0.0
+
+        ###################
+        # train the model #
+        ###################
+        model.train() # prep model for training
+        for data, target in train_loader:
+            # clear the gradients of all optimized variables
+            optimizer.zero_grad()
+            # forward pass: compute predicted outputs by passing inputs to the model
+            output = model(data)
+            # calculate the loss
+            loss = criterion(output, target)
+            # backward pass: compute gradient of the loss with respect to model parameters
+            loss.backward()
+            # perform a single optimization step (parameter update)
+            optimizer.step()
+            # update running training loss
+            train_loss += loss.item()*data.size(0)
+
+        ######################    
+        # validate the model #
+        ######################
+        model.eval() # prep model for evaluation
+        for data, target in val_loader:
+            # forward pass: compute predicted outputs by passing inputs to the model
+            output = model(data)
+            # calculate the loss
+            loss = criterion(output, target)
+            # update running validation loss 
+            valid_loss += loss.item()*data.size(0)
+
+        # print training/validation statistics 
+        # calculate average loss over an epoch
+        train_loss = train_loss/len(train_loader.sampler)
+        valid_loss = valid_loss/len(val_loader.sampler)
+
+        # store the training and validation losses for later visualisation
+        train_losses.append(train_loss)
+        val_losses.append(valid_loss)
+
         
-    ######################    
-    # validate the model #
-    ######################
+
+        # save model if validation loss has decreased
+        if valid_loss <= valid_loss_min:
+
+            print('Epoch: {} \tTraining Loss: {:.6f} \tValidation Loss: {:.6f}'.format(
+          epoch+1, 
+          train_loss,
+          valid_loss
+          ))
+            torch.save(model.state_dict(), savedFileName) # save in colab
+            torch.save(model.state_dict(), '/content/drive/MyDrive/ResNet50.pt') # save in google drive
+            valid_loss_min = valid_loss
+
+    plt.plot(train_losses, label='Training loss')
+    plt.plot(val_losses, label='Validation loss')
+    plt.legend(frameon=False)
+
+    model.load_state_dict(torch.load(savedFileName))
+
+
+
+    #initialize lists to monitor test loss and accuracy
+    test_loss = 0.0
+    class_correct = list(0. for i in range(12))
+    class_total = list(0. for i in range(12))
+
     model.eval() # prep model for evaluation
-    for data, target in val_loader:
+
+    for data, target in test_loader:
         # forward pass: compute predicted outputs by passing inputs to the model
         output = model(data)
         # calculate the loss
         loss = criterion(output, target)
-        # update running validation loss 
-        valid_loss += loss.item()*data.size(0)
-        
-    # print training/validation statistics 
-    # calculate average loss over an epoch
-    train_loss = train_loss/len(train_loader.sampler)
-    valid_loss = valid_loss/len(val_loader.sampler)
+        # update test loss 
+        test_loss += loss.item()*data.size(0)
+        # convert output probabilities to predicted class
+        _, pred = torch.max(output, 1)
+        # compare predictions to true label
+        correct = np.squeeze(pred.eq(target.data.view_as(pred)))
+        # calculate test accuracy for each object class
+        for i in range(len(target)):
+            label = target.data[i]
+            class_correct[label] += correct[i].item()
+            class_total[label] += 1
 
-    # store the training and validation losses for later visualisation
-    train_losses.append(train_loss)
-    val_losses.append(valid_loss)
-    
-    print('Epoch: {} \tTraining Loss: {:.6f} \tValidation Loss: {:.6f}'.format(
-        epoch+1, 
-        train_loss,
-        valid_loss
-        ))
-    
-    # save model if validation loss has decreased
-    if valid_loss <= valid_loss_min:
-        print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
-        valid_loss_min,
-        valid_loss))
-        torch.save(model.state_dict(), 'ResNet50.pt') # save in colab
-        torch.save(model.state_dict(), '/content/drive/MyDrive/ResNet50.pt') # save in google drive
-        valid_loss_min = valid_loss
+    # calculate and print avg test loss
+    test_loss = test_loss/len(test_loader.sampler)
+    print('Test Loss: {:.6f}\n'.format(test_loss))
 
-plt.plot(train_losses, label='Training loss')
-plt.plot(val_losses, label='Validation loss')
-plt.legend(frameon=False)
+    for i in range(12):
+        if class_total[i] > 0:
+            print('Test Accuracy of %5s: %2d%% (%2d/%2d)' % (
+                str(i), 100 * class_correct[i] / class_total[i],
+                np.sum(class_correct[i]), np.sum(class_total[i])))
+        else:
+            print('Test Accuracy of %5s: N/A (no training examples)' % (classes[i]))
 
-
-model.load_state_dict(torch.load('ResNet50.pt'))
-
-
-
-#initialize lists to monitor test loss and accuracy
-test_loss = 0.0
-class_correct = list(0. for i in range(12))
-class_total = list(0. for i in range(12))
-
-model.eval() # prep model for evaluation
-
-for data, target in test_loader:
-    # forward pass: compute predicted outputs by passing inputs to the model
-    output = model(data)
-    # calculate the loss
-    loss = criterion(output, target)
-    # update test loss 
-    test_loss += loss.item()*data.size(0)
-    # convert output probabilities to predicted class
-    _, pred = torch.max(output, 1)
-    # compare predictions to true label
-    correct = np.squeeze(pred.eq(target.data.view_as(pred)))
-    # calculate test accuracy for each object class
-    for i in range(len(target)):
-        label = target.data[i]
-        class_correct[label] += correct[i].item()
-        class_total[label] += 1
-
-# calculate and print avg test loss
-test_loss = test_loss/len(test_loader.sampler)
-print('Test Loss: {:.6f}\n'.format(test_loss))
-
-for i in range(12):
-    if class_total[i] > 0:
-        print('Test Accuracy of %5s: %2d%% (%2d/%2d)' % (
-            str(i), 100 * class_correct[i] / class_total[i],
-            np.sum(class_correct[i]), np.sum(class_total[i])))
-    else:
-        print('Test Accuracy of %5s: N/A (no training examples)' % (classes[i]))
-
-print('\nTest Accuracy (Overall): %2d%% (%2d/%2d)' % (
+    print('\nTest Accuracy (Overall): %2d%% (%2d/%2d)' % (
     100. * np.sum(class_correct) / np.sum(class_total),
     np.sum(class_correct), np.sum(class_total)))
 
 
+print("------------------DIVIDER----------------------")
+print("------------------DIVIDER----------------------")
 
-# Visualize Sample Test Results
 
-# obtain one batch of test images
-dataiter = iter(test_loader)
-images, labels = dataiter.next()
+#lr   #bathc   #epoch    //   101 = 1     50 = 2     152 =3
 
-# get sample outputs
-output = model(images)
-# convert output probabilities to predicted class
-_, preds = torch.max(output, 1)
 
-# plot the first 4 images in the batch, along with the corresponding labels
-fig, axes = plt.subplots(figsize=(10,4), ncols=4)
-for ii in range(4):
-    ax = axes[ii]
-    imshow(images[ii], ax=ax, normalize=True)
-    ax.set_title("{} ({})".format(str(preds[ii].item()), str(labels[ii].item())),
-                 color=("green" if preds[ii]==labels[ii] else "red")) 
+RunAI(0.0005, 64, 100, 3) # 
+
+RunAI(0.0005, 32, 100, 3)  # 
+RunAI(0.0005, 32, 100, 1)
+RunAI(0.0005, 32, 100, 2)
+
+RunAI(0.001, 32, 100, 3)
+RunAI(0.001, 32, 100, 1)
+RunAI(0.001, 32, 100, 2)
+
+
+RunAI(0.001, 64, 100, 3)
+RunAI(0.001, 64, 100, 1) # done
+RunAI(0.001, 64, 100, 2)
+
+RunAI(0.003, 64, 100, 1)
