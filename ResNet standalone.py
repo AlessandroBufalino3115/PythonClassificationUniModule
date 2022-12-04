@@ -126,24 +126,10 @@ class ResNet(nn.Module):
 
 def ResNet50(img_channel=3, num_classes=12):
     return ResNet(block, [3, 4, 6, 3], img_channel, num_classes)
-
-
 def ResNet101(img_channel=3, num_classes=12):
     return ResNet(block, [3, 4, 23, 3], img_channel, num_classes)
-
-
 def ResNet152(img_channel=3, num_classes=12):
     return ResNet(block, [3, 8, 36, 3], img_channel, num_classes)
-
-
-def test():
-    net = ResNet101(img_channel=3, num_classes=12)
-    y = net(torch.randn(4, 3, 224, 224)).to("cuda")
-    print(y.size())
-
-
-
-
 
 def imshow(image, ax=None, title=None, normalize=True):
     """Imshow for Tensor."""
@@ -186,7 +172,7 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
 
     
     savedFileName = "ResNet" + " " + str(lr) + " " + str(batch_size) + " " + str(n_epochs)  +  " "  + str(ResNetType) + ".pt"
-    #print(model)
+
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr)
@@ -195,8 +181,6 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
     # dataset directory
     data_dir = '/content/drive/MyDrive/Dataset'
 
-    # define batch size
-    #batch_size = 64
 
     # define transforms (colour)
     transform = transforms.Compose([transforms.Resize(64), # resize to 32x?
@@ -204,6 +188,12 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
                             transforms.ToTensor(), # convert data to torch.FloatTensor
                             transforms.Normalize([0.5, 0.5, 0.5],
                                                     [0.5, 0.5, 0.5])]) # normalise with mean 0.5 and standard deviation 0.5 for each colour channel
+
+
+
+
+
+
 
     # choose the training, validation and test datasets
     train_data = datasets.ImageFolder(data_dir + '/Train', transform=transform)
@@ -216,9 +206,6 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
     test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=True)
 
 
-
-    # number of epochs to train the model
-    #n_epochs = 100
 
     # initialise tracker for minimum validation loss
     valid_loss_min = np.Inf # set initial "min" to infinity
@@ -333,26 +320,8 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
     np.sum(class_correct), np.sum(class_total)))
 
 
-print("------------------DIVIDER----------------------")
-print("------------------DIVIDER----------------------")
-
+print("running AI")
 
 #lr   #bathc   #epoch    //   101 = 1     50 = 2     152 =3
 
-
-RunAI(0.0005, 64, 100, 3) # 
-
-RunAI(0.0005, 32, 100, 3)  # 
-RunAI(0.0005, 32, 100, 1)
-RunAI(0.0005, 32, 100, 2)
-
-RunAI(0.001, 32, 100, 3)
-RunAI(0.001, 32, 100, 1)
-RunAI(0.001, 32, 100, 2)
-
-
-RunAI(0.001, 64, 100, 3)
-RunAI(0.001, 64, 100, 1) # done
-RunAI(0.001, 64, 100, 2)
-
-RunAI(0.003, 64, 100, 1)
+RunAI(0.0001,64,100,2)

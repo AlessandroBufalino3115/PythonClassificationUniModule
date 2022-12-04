@@ -29,3 +29,9 @@ https://drive.google.com/drive/folders/18HdUuFPQUsI1IDsePJPwK89-w_4_s64n?usp=sha
 
 
 https://towardsdatascience.com/improving-the-performance-of-resnet50-graffiti-image-classifier-with-hyperparameter-tuning-in-keras-dbb59f43c6f7
+
+
+
+
+Detecting Affect States Using VGG16, ResNet50 and SE‑ResNet50 Networks   
+https://web.archive.org/web/20200507215623/https://link.springer.com/content/pdf/10.1007/s42979-020-0114-9.pdf
