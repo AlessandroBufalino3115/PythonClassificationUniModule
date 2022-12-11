@@ -108,12 +108,8 @@ class ResNet(nn.Module):
             block(self.in_channels, intermediate_channels, identity_downsample, stride)
         )
 
-        # The expansion size is always 4 for ResNet 50,101,152
         self.in_channels = intermediate_channels * 4
-
-        # For example for first resnet layer: 256 will be mapped to 64 as intermediate layer,
-        # then finally back to 256. Hence no identity downsample is needed, since stride = 1,
-        # and also same amount of channels.
+        
         for i in range(num_residual_blocks - 1):
             layers.append(block(self.in_channels, intermediate_channels))
 
