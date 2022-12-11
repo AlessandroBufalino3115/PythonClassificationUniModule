@@ -7,5 +7,5 @@ LINK TO THE GITHUB WITH THE CODE IMPLEMENTATION OF ResNet50, ResNet101 AND ResNe
 https://github.com/AlessandroBufalino3115/PythonClassificationUniModule
 
 
-LINK TO GOOGLE DRIVE WITH THE REASERCH REPORT
-
+LINK TO ONEDRIVE WITH THE REASERCH REPORT
+https://uweacuk-my.sharepoint.com/:w:/g/personal/alessandro2_bufalino_live_uwe_ac_uk/EZhTkuC38WlCnOP_-v1P2zUBNXWHHr4_dscjixhvCq6g5w?e=uoVcGb
