@@ -12,7 +12,8 @@ from torchvision import datasets, transforms
 
 import torch.optim as optim
 
-
+# this is a residual block
+# with a stack of layers inside
 class block(nn.Module):
     def __init__(self, in_channels, intermediate_channels, identity_downsample=None, stride=1):
         super(block, self).__init__()
@@ -60,7 +61,6 @@ class ResNet(nn.Module):
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        # Essentially the entire ResNet architecture are in these 4 lines below
         self.layer1 = self._make_layer(block, layers[0], intermediate_channels=64, stride=1)
         self.layer2 = self._make_layer(block, layers[1], intermediate_channels=128, stride=2)
         self.layer3 = self._make_layer(block, layers[2], intermediate_channels=256, stride=2)
@@ -120,10 +120,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
 
-
-
-
-
+#initiate the specific resnet variant
 def ResNet50(img_channel=3, num_classes=12):
     return ResNet(block, [3, 4, 6, 3], img_channel, num_classes)
 def ResNet101(img_channel=3, num_classes=12):
@@ -166,21 +163,13 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
     else :
       model = ResNet152()
 
-
-
-
-
-    
     savedFileName = "ResNet" + " " + str(lr) + " " + str(batch_size) + " " + str(n_epochs)  +  " "  + str(ResNetType) + ".pt"
-
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr)
 
-
     # dataset directory
     data_dir = '/content/drive/MyDrive/Dataset'
-
 
     # define transforms (colour)
     transform = transforms.Compose([transforms.Resize(64), # resize to 32x?
@@ -188,11 +177,6 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
                             transforms.ToTensor(), # convert data to torch.FloatTensor
                             transforms.Normalize([0.5, 0.5, 0.5],
                                                     [0.5, 0.5, 0.5])]) # normalise with mean 0.5 and standard deviation 0.5 for each colour channel
-
-
-
-
-
 
 
     # choose the training, validation and test datasets

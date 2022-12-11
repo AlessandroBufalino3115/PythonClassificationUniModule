@@ -1,37 +1,11 @@
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6308804/
-https://becominghuman.ai/transfer-learning-part-4-2-implementing-vgg-16-and-vgg-19-in-pytorch-c6056d974b19
-
-https://www.sciencedirect.com/science/article/pii/S2214317320302067
-https://cloudvane.net/big-data-2/convolutional-neural-network-cnn-and-feedforward-neural-network/
-
-https://www.researchgate.net/publication/332418347_Analysis_of_Classification_Algorithms_for_Insect_Detection_using_MATLAB
-
-https://www.researchgate.net/publication/338944674_Butterfly_Classification_with_Machine_Learning_Methodologies_for_an_Android_Application
-resnet50
-
-
-chrome-extension://gphandlahdpffmccakmbngmbjnjiiahp/https://mdpi-res.com/d_attachment/electronics/electronics-11-02016/article_deploy/electronics-11-02016-v2.pdf?version=1656398969
-mobilenet
-vgg19
-
-
-https://www.sciencedirect.com/science/article/pii/S2215098619326011
-
-
-https://arxiv.org/abs/1512.03385
-https://www.youtube.com/watch?v=DkNIBBBvcPs
-proper resnet stuff
+LINK TO THE GOGOLE DRIVE WITH THE DATASET AND DATASET RESULTS
+https://drive.google.com/drive/folders/1aNmllPgCSYFHYt0TU1Lg6vGpDb7RSgkP?usp=share_link
 
 
 
-
-https://drive.google.com/drive/folders/18HdUuFPQUsI1IDsePJPwK89-w_4_s64n?usp=share_link
-
-
-https://towardsdatascience.com/improving-the-performance-of-resnet50-graffiti-image-classifier-with-hyperparameter-tuning-in-keras-dbb59f43c6f7
+LINK TO THE GITHUB WITH THE CODE IMPLEMENTATION OF ResNet50, ResNet101 AND ResNet152
+https://github.com/AlessandroBufalino3115/PythonClassificationUniModule
 
 
+LINK TO GOOGLE DRIVE WITH THE REASERCH REPORT
 
-
-Detecting Affect States Using VGG16, ResNet50 and SE‑ResNet50 Networks   
-https://web.archive.org/web/20200507215623/https://link.springer.com/content/pdf/10.1007/s42979-020-0114-9.pdf

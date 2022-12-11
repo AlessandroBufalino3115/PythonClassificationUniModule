@@ -31,35 +31,37 @@ sizeList = [81,105,127,92,111,127,119,72,125,136,95,105]
 #     print("train " + str(round(trainList[i]/sizeList[i], 5)))
 
 
-some = 5
-i = 0
+
+
+
 #randomly rotate all the images, take out black background too
-# folder_dir = r"C:\Users\Alex\Desktop\Uni work\Year 3\AI for Creative Technologies\DatasetRandom\Train"
-# for folders in os.listdir(folder_dir):
-#     newfolderName = folder_dir+ "\\" + folders
-#     for images in os.listdir(newfolderName):
+
+folder_dir = r"C:\Users\Alex\Desktop\Uni work\Year 3\AI for Creative Technologies\DatasetRandom\Train"
+for folders in os.listdir(folder_dir):
+    newfolderName = folder_dir+ "\\" + folders
+    for images in os.listdir(newfolderName):
     
-#         picName = newfolderName + "\\" + images
+        picName = newfolderName + "\\" + images
     
-#         rotate = random.randint(0, 360)
-#         img = Image.open(picName)
-#         img = img.rotate(rotate, expand=True) 
+        rotate = random.randint(0, 360)
+        img = Image.open(picName)
+        img = img.rotate(rotate, expand=True) 
     
     
-#         img = img.convert("RGBA")
+        img = img.convert("RGBA")
     
-#         newData = []
-#         datas = img.getdata()
+        newData = []
+        datas = img.getdata()
     
-#         for item in datas:
-#             if item[0] == 0 and item[1] == 0 and item[2] == 0:
-#                 newData.append((0, 0, 0, 0))
-#             else:
-#                 newData.append(item)
+        for item in datas:
+            if item[0] == 0 and item[1] == 0 and item[2] == 0:
+                newData.append((0, 0, 0, 0))
+            else:
+                newData.append(item)
     
-#         img.putdata(newData)
-#         img.save(picName)
-#         print(images)
+        img.putdata(newData)
+        img.save(picName)
+        print(images)
     
 
 
