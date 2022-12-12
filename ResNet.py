@@ -6,14 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torchvision import datasets, transforms
-
-
-
-
 import torch.optim as optim
 
-# this is a residual block
-# with a stack of layers inside
+
 class block(nn.Module):
     def __init__(self, in_channels, intermediate_channels, identity_downsample=None, stride=1):
         super(block, self).__init__()
@@ -61,6 +56,7 @@ class ResNet(nn.Module):
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
+        # Essentially the entire ResNet architecture are in these 4 lines below
         self.layer1 = self._make_layer(block, layers[0], intermediate_channels=64, stride=1)
         self.layer2 = self._make_layer(block, layers[1], intermediate_channels=128, stride=2)
         self.layer3 = self._make_layer(block, layers[2], intermediate_channels=256, stride=2)
@@ -108,44 +104,33 @@ class ResNet(nn.Module):
             block(self.in_channels, intermediate_channels, identity_downsample, stride)
         )
 
+        # The expansion size is always 4 for ResNet 50,101,152
         self.in_channels = intermediate_channels * 4
-        
+
+        # For example for first resnet layer: 256 will be mapped to 64 as intermediate layer,
+        # then finally back to 256. Hence no identity downsample is needed, since stride = 1,
+        # and also same amount of channels.
         for i in range(num_residual_blocks - 1):
             layers.append(block(self.in_channels, intermediate_channels))
 
         return nn.Sequential(*layers)
 
 
-#initiate the specific resnet variant
+
+
+
+
 def ResNet50(img_channel=3, num_classes=12):
     return ResNet(block, [3, 4, 6, 3], img_channel, num_classes)
+
+
 def ResNet101(img_channel=3, num_classes=12):
     return ResNet(block, [3, 4, 23, 3], img_channel, num_classes)
+
+
 def ResNet152(img_channel=3, num_classes=12):
     return ResNet(block, [3, 8, 36, 3], img_channel, num_classes)
 
-def imshow(image, ax=None, title=None, normalize=True):
-    """Imshow for Tensor."""
-    if ax is None:
-        fig, ax = plt.subplots()
-    image = image.numpy().transpose((1, 2, 0))
-
-    if normalize:
-        mean = np.array([0.5, 0.5, 0.5])
-        std = np.array([0.5, 0.5, 0.5])
-        image = std * image + mean
-        image = np.clip(image, 0, 1)
-
-    ax.imshow(image)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.tick_params(axis='both', length=0)
-    ax.set_xticklabels('')
-    ax.set_yticklabels('')
-
-    return ax
 
 
 def RunAI(lr, batch_size,n_epochs, ResNetType):
@@ -156,24 +141,23 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
       model = ResNet101()
     elif ResNetType == 2:
       model = ResNet50()
-    else :
+    else:
       model = ResNet152()
+
+
 
     savedFileName = "ResNet" + " " + str(lr) + " " + str(batch_size) + " " + str(n_epochs)  +  " "  + str(ResNetType) + ".pt"
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr)
 
-    # dataset directory
-    data_dir = '/content/drive/MyDrive/Dataset'
+    data_dir = '/content/DatasetRandom'
 
-    # define transforms (colour)
     transform = transforms.Compose([transforms.Resize(64), # resize to 32x?
                             transforms.CenterCrop(32), # take a square (32x32) crop from the centre
                             transforms.ToTensor(), # convert data to torch.FloatTensor
                             transforms.Normalize([0.5, 0.5, 0.5],
                                                     [0.5, 0.5, 0.5])]) # normalise with mean 0.5 and standard deviation 0.5 for each colour channel
-
 
     # choose the training, validation and test datasets
     train_data = datasets.ImageFolder(data_dir + '/Train', transform=transform)
@@ -184,8 +168,6 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
     train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=True)
-
-
 
     # initialise tracker for minimum validation loss
     valid_loss_min = np.Inf # set initial "min" to infinity
@@ -237,8 +219,6 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
         train_losses.append(train_loss)
         val_losses.append(valid_loss)
 
-        
-
         # save model if validation loss has decreased
         if valid_loss <= valid_loss_min:
 
@@ -248,7 +228,7 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
           valid_loss
           ))
             torch.save(model.state_dict(), savedFileName) # save in colab
-            torch.save(model.state_dict(), '/content/drive/MyDrive/ResNet50.pt') # save in google drive
+            torch.save(model.state_dict(), '/content/ResNet50.pt') # save in google drive
             valid_loss_min = valid_loss
 
     plt.plot(train_losses, label='Training loss')
@@ -256,7 +236,6 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
     plt.legend(frameon=False)
 
     model.load_state_dict(torch.load(savedFileName))
-
 
 
     #initialize lists to monitor test loss and accuracy
@@ -300,8 +279,12 @@ def RunAI(lr, batch_size,n_epochs, ResNetType):
     np.sum(class_correct), np.sum(class_total)))
 
 
-print("running AI")
+print("------------------DIVIDER----------------------")
+print("------------------DIVIDER----------------------")
+
 
 #lr   #bathc   #epoch    //   101 = 1     50 = 2     152 =3
 
-RunAI(0.0001,64,100,2)
+
+RunAI(0.001, 64, 100, 3) # 
+
